@@ -8,7 +8,7 @@ import os
 
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from Exp_DataSet import Corpus  # 确保这个文件存在并正确实现
+from Exp_DataSet import Corpus
 from Exp_Model import BiLSTM_model, Transformer_model, TransformerWithBertInit
 
 def train_one_epoch(model, data_loader, loss_function, optimizer, device, batch_size):
