@@ -234,12 +234,8 @@ def main():
     data_loader_train = DataLoader(dataset=dataset.train, batch_size=batch_size, shuffle=True)
     data_loader_valid = DataLoader(dataset=dataset.valid, batch_size=batch_size, shuffle=False)
     data_loader_test = DataLoader(dataset=dataset.test, batch_size=batch_size, shuffle=False)
-
-    # 选择模型方式
-    # 方式1: 完全使用预训练BERT
-    # model = BertClassifier(num_classes=num_class, pretrained_model_name='bert-base-chinese').to(device)
     
-    # 方式2: 使用预训练BERT参数初始化自定义Transformer
+    # 方式1: 使用预训练BERT参数初始化自定义Transformer
     model = TransformerWithBertInit(
         d_emb=d_emb,
         d_hid=d_hid,
@@ -252,7 +248,7 @@ def main():
     # Move to device after parameter copying
     model.to(device)
     
-    # 方式3: 使用原始的Transformer_model（不使用预训练参数）
+    # 方式2: 使用原始的Transformer_model（不使用预训练参数）
     # model = Transformer_model(
     #     vocab_size=dataset.tokenizer.vocab_size,
     #     ntoken=50,
@@ -264,7 +260,7 @@ def main():
     #     embedding_weight=dataset.embedding_weight
     # ).to(device)
     
-    # 方式4: 使用BiLSTM_model
+    # 方式3: 使用BiLSTM_model
     # model = BiLSTM_model(
     #     vocab_size=dataset.tokenizer.vocab_size,
     #     ntoken=50,

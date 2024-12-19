@@ -23,28 +23,9 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:, :x.size(1), :]
         return self.dropout(x)
 
-# 方式1: 完全调用预训练BERT模型
-class BertClassifier(nn.Module):
-    def __init__(self, num_classes=10, pretrained_model_name='bert-base-chinese'):
-        super(BertClassifier, self).__init__()
-        self.bert = BertModel.from_pretrained(pretrained_model_name)
-        self.dropout = nn.Dropout(0.3)
-        self.classifier = nn.Linear(self.bert.config.hidden_size, num_classes)
-    
-    def forward(self, input_ids, attention_mask):
-        outputs = self.bert(
-            input_ids=input_ids,
-            attention_mask=attention_mask
-        )
-        # 使用 [CLS] token 的输出进行分类
-        cls_output = outputs.last_hidden_state[:, 0, :]
-        cls_output = self.dropout(cls_output)
-        logits = self.classifier(cls_output)
-        return logits
-
-# 方式2: 保留原有Transformer架构，仅迁移BERT参数，并保持 d_emb=768
+# 方式1: 保留原有Transformer架构，仅迁移BERT参数，并保持 d_emb=768
 class TransformerWithBertInit(nn.Module):
-    def __init__(self, d_emb=768, d_hid=3072, nhead=12, nlayers=6, dropout=0.2, num_class=10, pretrained_model_name='bert-base-chinese'):
+    def __init__(self, d_emb=768, d_hid=3072, nhead=12, nlayers=6, dropout=0.2, num_class=15, pretrained_model_name='bert-base-chinese'):
         super(TransformerWithBertInit, self).__init__()
         # 加载预训练的BERT模型 (默认在CPU)
         bert = BertModel.from_pretrained(pretrained_model_name)
@@ -97,7 +78,7 @@ class TransformerWithBertInit(nn.Module):
         logits = self.classifier(combined)  # [batch_size, num_class]
         return logits
 
-# 方式3: 原始的Transformer_model（不使用预训练参数）
+# 方式2: 原始的Transformer_model（不使用预训练参数）
 class Transformer_model(nn.Module):
     def __init__(self, vocab_size, ntoken, d_emb=300, d_hid=2048, nhead=6, nlayers=6, dropout=0.2, embedding_weight=None):
         super(Transformer_model, self).__init__()
@@ -113,7 +94,7 @@ class Transformer_model(nn.Module):
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=nlayers)
         self.dropout = nn.Dropout(dropout)
-        self.classifier = nn.Linear(d_emb, 10)  # num_classes=10
+        self.classifier = nn.Linear(d_emb, 10)  # num_classes=15
     
     def forward(self, input_ids, attention_mask=None):
         x = self.embed(input_ids)  # [batch_size, seq_len, d_emb]
@@ -130,14 +111,14 @@ class Transformer_model(nn.Module):
         logits = self.classifier(combined)  # [batch_size, num_class]
         return logits
 
-# 方式4: 使用BiLSTM_model
+# 方式3: 使用BiLSTM_model
 class BiLSTM_model(nn.Module):
     def __init__(self, vocab_size, ntoken, d_emb=300, d_hid=80, nlayers=1, dropout=0.2, embedding_weight=None):
         super().__init__()
         self.embed = nn.Embedding(num_embeddings=vocab_size, embedding_dim=d_emb, _weight=embedding_weight)
         self.lstm = nn.LSTM(input_size=d_emb, hidden_size=d_hid, num_layers=nlayers, bidirectional=True, batch_first=True)
         self.dropout = nn.Dropout(dropout)
-        num_class = 10
+        num_class = 15
         self.classifier = nn.Linear(d_hid*2, num_class)
 
     def forward(self, input_ids, attention_mask=None):
