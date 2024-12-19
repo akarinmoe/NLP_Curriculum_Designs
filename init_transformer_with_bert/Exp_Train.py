@@ -9,7 +9,7 @@ import os
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from Exp_DataSet import Corpus  # 确保这个文件存在并正确实现
-from Exp_Model import BiLSTM_model, Transformer_model, TransformerWithBertInit, BertClassifier
+from Exp_Model import BiLSTM_model, Transformer_model, TransformerWithBertInit
 
 def train_one_epoch(model, data_loader, loss_function, optimizer, device, batch_size):
     model.train()
@@ -20,7 +20,7 @@ def train_one_epoch(model, data_loader, loss_function, optimizer, device, batch_
     tqdm_iterator = tqdm(data_loader, dynamic_ncols=True, desc='Training')
 
     for data in tqdm_iterator:
-        if isinstance(model, (BertClassifier, TransformerWithBertInit)):
+        if isinstance(model, (TransformerWithBertInit)):
             # 数据集返回 (input_ids, labels)
             input_ids, labels = data
 
@@ -88,7 +88,7 @@ def validate(model, data_loader, loss_function, device, batch_size):
     with torch.no_grad():
         tqdm_iterator = tqdm(data_loader, dynamic_ncols=True, desc='Validation')
         for data in tqdm_iterator:
-            if isinstance(model, (BertClassifier, TransformerWithBertInit)):
+            if isinstance(model, (TransformerWithBertInit)):
                 # 数据集返回 (input_ids, labels)
                 input_ids, labels = data
                 input_ids = input_ids.to(device)
@@ -148,7 +148,7 @@ def predict(model, data_loader, dataset, device, output_folder):
     with torch.no_grad():
         tqdm_iterator = tqdm(data_loader, dynamic_ncols=True, desc='Predicting')
         for data in tqdm_iterator:
-            if isinstance(model, (BertClassifier, TransformerWithBertInit)):
+            if isinstance(model, (TransformerWithBertInit)):
                 # 数据集返回 (input_ids, ids)
                 input_ids, ids = data
                 input_ids = input_ids.to(device)
@@ -294,7 +294,7 @@ def main():
               f"Valid Loss={valid_loss:.4f}, Valid Acc={valid_acc*100:.2f}%")
     
     # 加载最佳模型
-    if isinstance(model, (BertClassifier, TransformerWithBertInit)):
+    if isinstance(model, (TransformerWithBertInit)):
         model.load_state_dict(torch.load(os.path.join(output_folder, "model.ckpt")))
     else:
         model = Transformer_model(
